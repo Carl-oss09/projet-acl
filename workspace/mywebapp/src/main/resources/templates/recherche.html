@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-transform: uppercase;
+            font-size: 2rem;
+            height: 60px;
+        }
+        .filters-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 20px;
+        }
+        .filter-group {
+            margin-right: 30px;
+            display: flex;
+            align-items: center;
+        }
+        .filter-group label {
+            margin-right: 10px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .course-item {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .badge-success {
+            background-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    Recherche
+</div>
+
+<!-- Filters -->
+<form th:action="@{/recherche}" method="get" class="filters-container" id="filter-form">
+    <div class="filter-group">
+        <label for="date">Date :</label>
+        <input type="date" id="date" class="form-control" name="date" th:value="${date}">
+    </div>
+    <div class="filter-group">
+        <label for="matiere">Matière :</label>
+        <select id="matiere" class="form-control" name="matiere">
+            <option value="Toutes" th:selected="${matiere == null || matiere == 'Toutes'}">Toutes</option>
+            <option value="Mathématiques" th:selected="${matiere == 'Mathématiques'}">Mathématiques</option>
+            <option value="Physique" th:selected="${matiere == 'Physique'}">Physique</option>
+            <option value="Français" th:selected="${matiere == 'Français'}">Français</option>
+            <option value="Chimie" th:selected="${matiere == 'Chimie'}">Chimie</option>
+            <option value="Informatique" th:selected="${matiere == 'Informatique'}">Informatique</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Rechercher</button>
+</form>
+
+<!-- Results -->
+<div class="content" id="course-list">
+    <div th:each="cours : ${coursList}" class="course-item d-flex justify-content-between align-items-center">
+        <div>
+            <h4 th:text="${cours.titre}">Titre du Cours</h4>
+            <p th:text="'Description : ' + ${cours.description}">Description</p>
+            <p th:text="'Matière : ' + ${cours.matiere}">Matière</p>
+            <p th:text="'Date : ' + ${cours.date}">Date</p>
+        </div>
+        <div>
+            <!-- Vérifie si l'étudiant est déjà inscrit -->
+            <span th:if="${coursReserves != null and coursReserves.contains(cours.id)}" class="badge badge-success">Inscrit</span>
+
+            <!-- Bouton "S'inscrire" seulement si l'étudiant n'est pas encore inscrit -->
+            <button type="button" class="btn btn-success"
+                    th:if="${coursReserves == null or !coursReserves.contains(cours.id)}"
+                    th:onclick="|location.href='/cours/inscrire?idCours=' + ${cours.id}|">S'inscrire</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

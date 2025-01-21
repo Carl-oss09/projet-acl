@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil Formateur</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            height: 60px;
+        }
+
+        .profile-btn {
+            font-size: 1rem;
+            color: white;
+            background-color: #0056b3;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+
+        .profile-btn:hover {
+            background-color: #004080;
+        }
+
+        .content {
+            display: flex;
+            height: calc(100vh - 60px); /* Subtracting header height */
+        }
+
+        .left-section {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid #ddd;
+        }
+
+        .right-section {
+            width: 50%;
+            padding: 20px;
+        }
+
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .add-course-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745; /* Green color */
+            color: white;
+            font-size: 2rem; /* Font size for the "+" */
+            border: none;
+            border-radius: 50%; /* Circular button */
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Shadow for better contrast */
+            cursor: pointer;
+            z-index: 1000; /* Ensure it appears above other content */
+        }
+
+        .add-course-btn:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div>Accueil Formateur</div>
+    <button class="profile-btn" onclick="window.location.href='profil-formateur'">👤 Profil</button>
+</div>
+
+<!-- Content -->
+<div class="content">
+    <!-- Left Section -->
+    <div class="left-section">
+        <h3>Informations Générales</h3>
+        <p>Contenu supplémentaire pour le formateur, tel que des statistiques ou des notifications.</p>
+    </div>
+
+    <!-- Right Section -->
+    <div class="right-section">
+        <h3>Calendrier</h3>
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- Add Course Modal -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" role="dialog" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCourseModalLabel">Ajouter un Nouveau Cours</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/formateurs/cours" method="post">
+                    <div class="form-group">
+                        <label for="matiere">Matière</label>
+                        <input type="text" class="form-control" id="matiere" name="matiere" placeholder="Matière du cours" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseTitle">Titre du Cours</label>
+                        <input type="text" class="form-control" id="courseTitle" name="titre" placeholder="Titre du cours" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="control-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" placeholder="Entrez une description du cours" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="date" class="control-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="aprem_matin" class="control-label">Matin ou Après-midi</label>
+                        <select class="form-control" id="aprem_matin" name="aprem_matin">
+                            <option value="true">Après-midi</option>
+                            <option value="false">Matin</option>
+                        </select>
+                    </div>
+                    <!-- Champ caché pour l'ID du professeur connecté -->
+                    <input type="hidden" id="id_prof" name="id_prof" th:value="${formateur.id}">
+
+                    <div class="form-group">
+                        <label for="nb_eleves_max" class="control-label">Nombre d'Élèves Maximum</label>
+                        <input type="number" class="form-control" id="nb_eleves_max" name="nb_eleves_max" placeholder="Entrez le nombre maximum d'élèves" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">Créer le Cours</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Course Button -->
+<button class="add-course-btn" data-toggle="modal" data-target="#addCourseModal">+</button>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#calendar').fullCalendar({
+            locale: 'fr',
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            events: []
+        });
+    });
+</script>
+
+</body>
+</html>

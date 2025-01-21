@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil Étudiant</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            height: 60px;
+        }
+
+        .profile-btn {
+            font-size: 1rem;
+            color: white;
+            background-color: #0056b3;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+
+        .profile-btn:hover {
+            background-color: #004080;
+        }
+
+        .content {
+            display: flex;
+            height: calc(100vh - 60px); /* Subtracting header height */
+        }
+
+        .left-section {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid #ddd;
+        }
+
+        .right-section {
+            width: 50%;
+            padding: 20px;
+        }
+
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div>Accueil Étudiant</div>
+    <button class="profile-btn" onclick="window.location.href='profil-etudiant'">👤 Profil</button>
+</div>
+
+<!-- Content -->
+<div class="content">
+    <!-- Left Section -->
+    <div class="left-section">
+        <h3>Informations Générales</h3>
+        <p>Contenu supplémentaire pour l'étudiant, tel que des statistiques ou des actualités.</p>
+    </div>
+
+    <!-- Right Section -->
+    <div class="right-section">
+        <h3>Calendrier</h3>
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- Search Button -->
+<a href="recherche" class="btn btn-primary" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);">
+    🔍 Rechercher
+</a>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#calendar').fullCalendar({
+            locale: 'fr',
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            views: {
+                agendaWeek: {
+                    type: 'agendaWeek',
+                    columnFormat: 'D MMM', // Affiche le jour et le mois (ex : 5 janv.)
+                    allDaySlot: true, // Garde la zone all-day
+                    slotDuration: '24:00:00', // Supprime les heures détaillées
+                    slotLabelFormat: '', // Enlève les labels d'heures
+                },
+                agendaDay: {
+                    type: 'agendaDay',
+                    columnFormat: 'D MMM',
+                    allDaySlot: true,
+                    slotDuration: '24:00:00',
+                    slotLabelFormat: '',
+                }
+            },
+            events: [
+                {
+                    title: 'Mathématiques - L1',
+                    start: '2024-12-21T10:00:00',
+                    end: '2024-12-21T12:00:00',
+                    description: 'Cours de mathématiques pour les étudiants en L1.',
+                    backgroundColor: '#007bff',
+                    textColor: '#ffffff'
+                },
+                {
+                    title: 'Informatique - L2',
+                    start: '2024-12-22T14:00:00',
+                    end: '2024-12-22T16:00:00',
+                    description: 'Cours d\'informatique pour les étudiants en L2.',
+                    backgroundColor: '#28a745',
+                    textColor: '#ffffff'
+                },
+                {
+                    title: 'Physique - L3',
+                    start: '2024-12-23T09:00:00',
+                    end: '2024-12-23T11:00:00',
+                    description: 'Cours de physique pour les étudiants en L3.',
+                    backgroundColor: '#dc3545',
+                    textColor: '#ffffff'
+                }
+            ],
+            titleFormat: 'D MMMM' // Format du titre du calendrier
+        });
+    });
+</script>
+
+</body>
+</html>

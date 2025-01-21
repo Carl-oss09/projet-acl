@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Étudiant</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .container {
+            margin: 30px auto;
+            max-width: 600px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-title {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .profile-details {
+            list-style: none;
+            padding: 0;
+        }
+
+        .profile-details li {
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .logout {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <h1>Profil Étudiant</h1>
+    <a href="/deconnexion">Déconnexion</a>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+    <h2 class="profile-title">Bienvenue, <span th:text="${etudiant.prenom}"></span> !</h2>
+    <ul class="profile-details">
+        <li><strong>ID :</strong> <span th:text="${etudiant.id}"></span></li>
+        <li><strong>Prénom :</strong> <span th:text="${etudiant.prenom}"></span></li>
+        <li><strong>Nom :</strong> <span th:text="${etudiant.nom}"></span></li>
+        <li><strong>Niveaux :</strong>
+            <ul>
+                <li>L1 : <span th:text="${etudiant.L1 ? 'Oui' : 'Non'}"></span></li>
+                <li>L2 : <span th:text="${etudiant.L2 ? 'Oui' : 'Non'}"></span></li>
+                <li>L3 : <span th:text="${etudiant.L3 ? 'Oui' : 'Non'}"></span></li>
+            </ul>
+        </li>
+    </ul>
+    <a href="/etudiants" class="btn btn-primary btn-block logout">Retour à l'accueil</a>
+</div>
+
+</body>
+</html>

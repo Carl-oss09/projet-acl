@@ -1,0 +1,8 @@
+# docker-compose.yml
+---
+services:
+  app:
+    build: .
+    image: "carlagrimaud/app:v0.1"
+    ports:
+    - "8000:8000"
