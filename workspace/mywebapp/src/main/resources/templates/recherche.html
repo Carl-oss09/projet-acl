@@ -90,12 +90,16 @@
             <p th:text="'Description : ' + ${cours.description}">Description</p>
             <p th:text="'Matière : ' + ${cours.matiere}">Matière</p>
             <p th:text="'Date : ' + ${cours.date}">Date</p>
-            <p th:text="'Id : ' + ${cours.id}">Id</p>
         </div>
         <div>
+            <!-- Bouton S'inscrire -->
             <form th:action="@{/inscription/cours}" method="post">
                 <input type="hidden" name="idCours" th:value="${cours.id}" />
-                <button type="submit" class="btn btn-success">S'inscrire</button>
+                <button type="submit" class="btn btn-success"
+                        th:disabled="${cours.nb_eleves_max <= cours.nbInscriptions || cours.estDejaInscrit ? 'disabled' : null}"
+                        th:classappend="${cours.nb_eleves_max <= cours.nbInscriptions || cours.estDejaInscrit ? ' btn-secondary' : ''}">
+                    <span th:text="${cours.nb_eleves_max <= cours.nbInscriptions ? 'Complet' : 'S''inscrire'}"></span>
+                </button>
             </form>
         </div>
     </div>

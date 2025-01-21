@@ -4,7 +4,6 @@ import com.example.mywebapp.client.CoursClient;
 import com.example.mywebapp.client.ReservationClient;
 import com.example.mywebapp.model.Cours;
 import com.example.mywebapp.model.Reservation;
-import com.example.mywebapp.model.Etudiant;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,15 +32,18 @@ public class CoursController {
         return "formateurs"; // Retourne le template formateurs.html
     }
 
-    // Méthode pour afficher la recherche des cours
     @GetMapping("/recherche")
     public String rechercherCours(
             @RequestParam(required = false) String date,
             @RequestParam(required = false) String matiere,
-            Model model
+            Model model,
+            HttpSession session
     ) {
         try {
             List<Cours> coursList;
+
+            // Récupération de l'id de l'étudiant connecté
+            Long idEtudiant = (Long) session.getAttribute("userId");
 
             // Logique de filtrage
             if (date == null && (matiere == null || matiere.equalsIgnoreCase("Toutes"))) {
@@ -54,6 +56,14 @@ public class CoursController {
                 coursList = coursClient.rechercherCours(date, matiere);
             }
 
+            // Calcul des informations supplémentaires pour chaque cours
+            for (Cours cours : coursList) {
+                List<Reservation> reservations = reservationClient.getReservationByCoursId(cours.getId());
+                cours.setNbInscriptions(reservations.size());
+                cours.setEstDejaInscrit(reservations.stream()
+                        .anyMatch(reservation -> Objects.equals(reservation.getIdEleve(), idEtudiant)));
+            }
+
             model.addAttribute("coursList", coursList);
             model.addAttribute("date", date);
             model.addAttribute("matiere", matiere);
@@ -64,30 +74,6 @@ public class CoursController {
             e.printStackTrace();
             return "recherche";
         }
-    }
-
-    public String afficherCours(HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        String userType = (String) session.getAttribute("userType");
-
-        if (userId == null || userType == null || !userType.equals("etudiant")) {
-            return "redirect:/connexion";
-        }
-
-        List<Cours> coursList = coursClient.getAllCours();
-        List<Reservation> Resa = reservationClient.getReservationByIdEleve(userId);
-        List<Cours> coursReserves = new ArrayList<>();
-
-        for (Reservation reservation : Resa) {
-            Cours coursReserve = coursClient.getCoursById(reservation.getId_cours());
-            if (coursReserve != null) {
-                coursReserves.add(coursReserve);
-            }
-        }
-
-        model.addAttribute("coursList", coursList);
-        model.addAttribute("coursReserves", coursReserves);
-        return "recherche";
     }
 
     @GetMapping("/cours/all")
@@ -174,45 +160,48 @@ public class CoursController {
     @PostMapping("/inscription/cours")
     @ResponseBody
     public String inscrireEtudiant(@RequestParam Long idCours, HttpSession session) {
+        System.out.println(idCours);
         try {
             // Récupération de l'ID de l'étudiant à partir de la session
             Long idEtudiant = (Long) session.getAttribute("userId");
 
             // Vérification que l'utilisateur est bien un étudiant connecté
             if (idEtudiant == null) {
-                return "Utilisateur non connecté ou session invalide.";
+                System.out.println("Utilisateur non connecté ou session invalide.");
             }
 
             // Vérification si le cours existe
             Cours cours = coursClient.getCoursById(idCours);
             if (cours == null) {
-                return "Cours introuvable.";
+                System.out.println("Cours introuvable.");
             }
 
             // Vérification si le cours a atteint sa capacité maximale
             List<Reservation> reservationsForCours = reservationClient.getReservationByCoursId(idCours);
             if (reservationsForCours.size() >= cours.getNb_eleves_max()) {
-                return "Ce cours est complet.";
+                System.out.println("Ce cours est complet.");
             }
 
             // Vérification si l'étudiant est déjà inscrit à ce cours
             List<Reservation> reservations = reservationClient.getReservationByIdEleve(idEtudiant);
             boolean dejaInscrit = reservations.stream()
-                    .anyMatch(reservation -> Objects.equals(reservation.getId_cours(), idCours));
+                    .anyMatch(reservation -> Objects.equals(reservation.getIdCours(), idCours));
 
             if (dejaInscrit) {
-                return "Vous êtes déjà inscrit à ce cours.";
+                System.out.println("Vous êtes déjà inscrit à ce cours.");
             }
 
             // Si pas encore inscrit, créer une nouvelle réservation
             Reservation reservation = new Reservation(idCours, idEtudiant);
             reservationClient.addReservation(reservation);
 
-            return "Inscription réussie !";
+            System.out.println("Inscription réussie !");
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Erreur lors de l'inscription. Veuillez réessayer PTNNNNN.";
+            System.out.println("Erreur lors de l'inscription. Veuillez réessayer PTNNNNN.");
         }
+        return "redirect:/recherche";
     }
+
 }

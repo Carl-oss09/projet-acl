@@ -51,7 +51,7 @@ public class ReservationController {
         // Récupérer les cours associés à chaque réservation
         for (Reservation reservation : Resa) {
             // Utiliser l'ID du cours dans la réservation pour récupérer le cours correspondant
-            Cours coursReserve = coursClient.getCoursById(reservation.getId_cours());
+            Cours coursReserve = coursClient.getCoursById(reservation.getIdCours());
             if (coursReserve != null) {
                 coursReserves.add(coursReserve);
             }
@@ -123,7 +123,7 @@ public class ReservationController {
             @RequestParam("id_eleve") Long id_eleve) {
         Reservation reservation = new Reservation();
         reservation.setId(id);
-        reservation.setId_cours(id_cours);
+        reservation.setIdCours(id_cours);
         reservation.setIdEleve(id_eleve);
 
         reservationClient.updateReservation(id, reservation);

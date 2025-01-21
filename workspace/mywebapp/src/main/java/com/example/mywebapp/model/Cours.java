@@ -3,15 +3,17 @@ package com.example.mywebapp.model;
 public class Cours {
 
     private Long id;
-
     private String matiere;
     private String titre;
     private String description;
     private String date;
-
     private boolean aprem_matin;
     private Long formateurId;
     private int nb_eleves_max;
+
+    // Champs supplémentaires
+    private int nbInscriptions;    // Nombre actuel d'inscriptions
+    private boolean estDejaInscrit; // Indique si l'utilisateur connecté est déjà inscrit
 
     // Constructeurs
     public Cours() {}
@@ -26,7 +28,7 @@ public class Cours {
         this.nb_eleves_max = nb_eleves_max;
     }
 
-    // Getters et Setters
+    // Getters et Setters existants...
     public Long getId() {
         return id;
     }
@@ -89,5 +91,22 @@ public class Cours {
 
     public void setNb_eleves_max(int nb_eleves_max) {
         this.nb_eleves_max = nb_eleves_max;
+    }
+
+    // Getters et Setters pour nbInscriptions et estDejaInscrit (champs dynamiques)
+    public int getNbInscriptions() {
+        return nbInscriptions;
+    }
+
+    public void setNbInscriptions(int nbInscriptions) {
+        this.nbInscriptions = nbInscriptions;
+    }
+
+    public boolean isEstDejaInscrit() {
+        return estDejaInscrit;
+    }
+
+    public void setEstDejaInscrit(boolean estDejaInscrit) {
+        this.estDejaInscrit = estDejaInscrit;
     }
 }
