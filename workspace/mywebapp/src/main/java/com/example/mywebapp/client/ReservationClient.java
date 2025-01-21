@@ -24,6 +24,9 @@ public interface ReservationClient {
     @GetMapping("/api/reservations/{id}")
     List<Reservation> getReservationById(@PathVariable("id") Long id);
 
-    @GetMapping("/api/reservations/student/{id}")
+    @GetMapping("/api/reservations/eleve/{id}")
     List<Reservation> getReservationByIdEleve(@PathVariable("id") Long id);
+
+    @GetMapping("/api/reservations/cours/{id}")
+    List<Reservation> getReservationByCoursId(@PathVariable("id") Long id);
 }

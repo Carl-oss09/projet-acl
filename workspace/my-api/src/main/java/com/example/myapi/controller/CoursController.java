@@ -125,7 +125,7 @@ public class CoursController {
     @Operation(summary = "Search courses by formateurId", description = "Retrieve courses by formateurId")
     @GetMapping("/formateur/{id}")
     public ResponseEntity<List<Cours>> getCoursByFormateurId(@PathVariable Long id) {
-        List<Cours> coursList = coursService.rechercherCoursParFormateurId(id);
+        List<Cours> coursList = coursService.getCoursParFormateurId(id);
         return ResponseEntity.ok(coursList);
     }
 }

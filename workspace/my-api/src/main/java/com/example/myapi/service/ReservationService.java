@@ -35,8 +35,12 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<Reservation> getReservationsByStudentId(Long id_eleve) {
-        return reservationRepository.findByIdEleve(id_eleve);
+    public List<Reservation> getReservationsByEleveId(Long idEleve) {
+        return reservationRepository.findByIdEleve(idEleve);
+    }
+
+    public List<Reservation> getReservationsByCoursId(Long idCours) {
+        return reservationRepository.findByIdCours(idCours);
     }
 
 }

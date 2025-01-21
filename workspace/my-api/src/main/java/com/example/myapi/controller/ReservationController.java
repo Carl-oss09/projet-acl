@@ -46,7 +46,7 @@ public class ReservationController {
     public ResponseEntity<String> updateReservation(@PathVariable Long id, @RequestBody Reservation updatedReservation) {
         Reservation existingReservation = reservationService.getReservationById(id);
         if (existingReservation != null) {
-            existingReservation.setId_cours(updatedReservation.getId_cours());
+            existingReservation.setIdCours(updatedReservation.getIdCours());
             existingReservation.setIdEleve(updatedReservation.getIdEleve());
             reservationService.updateReservation(existingReservation);
             return ResponseEntity.ok("Reservation mise à jour");
@@ -56,14 +56,17 @@ public class ReservationController {
     }
 
     @Operation(summary = "Get reservations by student ID", description = "Retrieve all reservations for a specific student")
-    @GetMapping("student/{id_eleve}")
-    public ResponseEntity<List<Reservation>> getReservationsByStudentId(@PathVariable Long id_eleve) {
-        List<Reservation> reservations = reservationService.getReservationsByStudentId(id_eleve);
-        if (!reservations.isEmpty()) {
-            return ResponseEntity.ok(reservations);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    @GetMapping("eleve/{idEleve}")
+    public ResponseEntity<List<Reservation>> getReservationsByEleveId(@PathVariable Long idEleve) {
+        List<Reservation> reservations = reservationService.getReservationsByEleveId(idEleve);
+        return ResponseEntity.ok(reservations);
+    }
+
+    @Operation(summary = "Get reservations by cours ID", description = "Retrieve all reservations for a specific student")
+    @GetMapping("cours/{idCours}")
+    public ResponseEntity<List<Reservation>> getReservationsByCoursId(@PathVariable Long idCours) {
+        List<Reservation> reservations = reservationService.getReservationsByCoursId(idCours);
+        return ResponseEntity.ok(reservations);
     }
 
 

@@ -49,6 +49,9 @@
         .badge-success {
             background-color: #28a745;
         }
+        .back-home {
+            margin-left: auto;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +79,7 @@
         </select>
     </div>
     <button type="submit" class="btn btn-primary">Rechercher</button>
+    <a href="etudiants" class="btn btn-secondary back-home">Retour à l'accueil</a>
 </form>
 
 <!-- Results -->
@@ -86,15 +90,13 @@
             <p th:text="'Description : ' + ${cours.description}">Description</p>
             <p th:text="'Matière : ' + ${cours.matiere}">Matière</p>
             <p th:text="'Date : ' + ${cours.date}">Date</p>
+            <p th:text="'Id : ' + ${cours.id}">Id</p>
         </div>
         <div>
-            <!-- Vérifie si l'étudiant est déjà inscrit -->
-            <span th:if="${coursReserves != null and coursReserves.contains(cours.id)}" class="badge badge-success">Inscrit</span>
-
-            <!-- Bouton "S'inscrire" seulement si l'étudiant n'est pas encore inscrit -->
-            <button type="button" class="btn btn-success"
-                    th:if="${coursReserves == null or !coursReserves.contains(cours.id)}"
-                    th:onclick="|location.href='/cours/inscrire?idCours=' + ${cours.id}|">S'inscrire</button>
+            <form th:action="@{/inscription/cours}" method="post">
+                <input type="hidden" name="idCours" th:value="${cours.id}" />
+                <button type="submit" class="btn btn-success">S'inscrire</button>
+            </form>
         </div>
     </div>
 </div>

@@ -9,14 +9,14 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long id_cours;
+    private Long idCours;
     private Long idEleve;
 
     // Constructeurs
     public Reservation() {}
 
     public Reservation(Long id_cours, Long id_eleve) {
-        this.id_cours = id_cours;
+        this.idCours = id_cours;
         this.idEleve = id_eleve;
     }
 
@@ -29,12 +29,12 @@ public class Reservation {
         this.id = id;
     }
 
-    public Long getId_cours() {
-        return id_cours;
+    public Long getIdCours() {
+        return idCours;
     }
 
-    public void setId_cours(Long id_cours) {
-        this.id_cours = id_cours;
+    public void setIdCours(Long id_cours) {
+        this.idCours = id_cours;
     }
 
     public Long getIdEleve() {

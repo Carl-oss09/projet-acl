@@ -112,7 +112,7 @@ public class CoursService {
      * @param formateurId l'identifiant du formateur.
      * @return la liste des cours correspondants.
      */
-    public List<Cours> rechercherCoursParFormateurId(Long formateurId) {
+    public List<Cours> getCoursParFormateurId(Long formateurId) {
         return coursRepository.findByFormateurId(formateurId);
     }
 

@@ -24,6 +24,13 @@
         .btn-custom {
             width: 100%;
         }
+        .btn-user-choice {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-user-choice.active {
+            background-color: #007bff;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -65,8 +72,8 @@
                 </div>
                 <div class="modal-body">
                     <p class="text-muted text-center">Choisissez un type d'utilisateur :</p>
-                    <button type="button" class="btn btn-primary btn-block" onclick="showForm('etudiant')">Étudiant</button>
-                    <button type="button" class="btn btn-secondary btn-block" onclick="showForm('formateur')">Formateur</button>
+                    <button type="button" class="btn btn-user-choice btn-block" id="btnEtudiant" onclick="showForm('etudiant')">Étudiant</button>
+                    <button type="button" class="btn btn-user-choice btn-block" id="btnFormateur" onclick="showForm('formateur')">Formateur</button>
 
                     <!-- Formulaire Étudiant -->
                     <form id="formEtudiant" th:action="@{/login/etudiants}" th:object="${etudiant}" method="post" style="display: none;">
@@ -115,6 +122,18 @@
     function showForm(type) {
         document.getElementById('formEtudiant').style.display = (type === 'etudiant') ? 'block' : 'none';
         document.getElementById('formFormateur').style.display = (type === 'formateur') ? 'block' : 'none';
+
+        const btnEtudiant = document.getElementById('btnEtudiant');
+        const btnFormateur = document.getElementById('btnFormateur');
+
+        if (type === 'etudiant') {
+            btnEtudiant.classList.add('active');
+            btnFormateur.classList.remove('active');
+        } else {
+            btnFormateur.classList.add('active');
+            btnEtudiant.classList.remove('active');
+        }
+
         const title = (type === 'etudiant') ? "Formulaire d'inscription Étudiant" : "Formulaire d'inscription Formateur";
         document.getElementById('registerModalLabel').textContent = title;
     }

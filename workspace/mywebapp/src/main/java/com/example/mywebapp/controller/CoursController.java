@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 public class CoursController {
@@ -87,20 +88,6 @@ public class CoursController {
         model.addAttribute("coursList", coursList);
         model.addAttribute("coursReserves", coursReserves);
         return "recherche";
-    }
-
-    @PostMapping("/inscription/cours")
-    @ResponseBody
-    public String inscrireEtudiant(@RequestParam Long idCours, @SessionAttribute("etudiant") Etudiant etudiant) {
-        try {
-            Reservation reservation = new Reservation(idCours, etudiant.getId());
-            reservationClient.addReservation(reservation);
-
-            return "Inscription réussie !";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Erreur lors de l'inscription. Veuillez réessayer.";
-        }
     }
 
     @GetMapping("/cours/all")
@@ -182,5 +169,50 @@ public class CoursController {
     public String deleteCours(@RequestParam("id") Long id) {
         coursClient.deleteCours(id);
         return "redirect:/cours";
+    }
+
+    @PostMapping("/inscription/cours")
+    @ResponseBody
+    public String inscrireEtudiant(@RequestParam Long idCours, HttpSession session) {
+        try {
+            // Récupération de l'ID de l'étudiant à partir de la session
+            Long idEtudiant = (Long) session.getAttribute("userId");
+
+            // Vérification que l'utilisateur est bien un étudiant connecté
+            if (idEtudiant == null) {
+                return "Utilisateur non connecté ou session invalide.";
+            }
+
+            // Vérification si le cours existe
+            Cours cours = coursClient.getCoursById(idCours);
+            if (cours == null) {
+                return "Cours introuvable.";
+            }
+
+            // Vérification si le cours a atteint sa capacité maximale
+            List<Reservation> reservationsForCours = reservationClient.getReservationByCoursId(idCours);
+            if (reservationsForCours.size() >= cours.getNb_eleves_max()) {
+                return "Ce cours est complet.";
+            }
+
+            // Vérification si l'étudiant est déjà inscrit à ce cours
+            List<Reservation> reservations = reservationClient.getReservationByIdEleve(idEtudiant);
+            boolean dejaInscrit = reservations.stream()
+                    .anyMatch(reservation -> Objects.equals(reservation.getId_cours(), idCours));
+
+            if (dejaInscrit) {
+                return "Vous êtes déjà inscrit à ce cours.";
+            }
+
+            // Si pas encore inscrit, créer une nouvelle réservation
+            Reservation reservation = new Reservation(idCours, idEtudiant);
+            reservationClient.addReservation(reservation);
+
+            return "Inscription réussie !";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erreur lors de l'inscription. Veuillez réessayer PTNNNNN.";
+        }
     }
 }
