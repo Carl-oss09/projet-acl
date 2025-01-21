@@ -18,6 +18,10 @@ public interface EtudiantClient {
     @DeleteMapping("/api/etudiants/{id}")
     void deleteEtudiant(@PathVariable("id") Long id);
 
+    @PostMapping("/api/etudiants")
+    Long createEtudiantAndGetId(@RequestBody Etudiant etudiant);
+
+
     @PutMapping("/api/etudiants/{id}")
     void updateEtudiant(@PathVariable("id") Long id, @RequestBody Etudiant etudiant);
 

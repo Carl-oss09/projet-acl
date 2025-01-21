@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -47,12 +48,28 @@ public class FormateurController {
     }
 
     @PostMapping("/login/formateurs")
-    public String addFormateur(@ModelAttribute("formateur") Formateur formateur) {
-        System.out.println("Nom: " + formateur.getNom());
-        System.out.println("Prénom: " + formateur.getPrenom());
-        formateurClient.addFormateur(formateur);  // Ajoute le formateur via l'API
-        return "redirect:/login";  // Redirige vers la liste pour afficher la mise à jour
+    public String addFormateur(@ModelAttribute("formateur") Formateur formateur, RedirectAttributes redirectAttributes) {
+        // Ajoute le formateur via l'API
+        formateurClient.addFormateur(formateur);
+
+        // Récupère la liste de tous les formateurs
+        List<Formateur> formateurs = formateurClient.getAllFormateurs();
+
+        // Trouve le formateur avec l'ID le plus élevé
+        Formateur newFormateur = formateurs.stream()
+                .max((f1, f2) -> Long.compare(f1.getId(), f2.getId()))
+                .orElse(null);
+
+        if (newFormateur != null) {
+            Long newFormateurId = newFormateur.getId();
+            redirectAttributes.addFlashAttribute("successMessage", "Inscription réussie ! Votre ID de connexion est : " + newFormateurId);
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Inscription réussie, mais impossible de récupérer votre ID. Veuillez contacter l'administration.");
+        }
+
+        return "redirect:/connexion";  // Redirige vers la page de connexion
     }
+
 
     @PostMapping("/formateurs/update")
     public String updateFormateur(

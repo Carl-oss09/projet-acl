@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -34,45 +35,62 @@ public class EtudiantController {
 
     @GetMapping("/connexion")
     public String ConnexionAffichage(Model model) {
-        model.addAttribute("etudiant", new Etudiant()); // Ajouter un objet vide pour le formulaire étudiant
-        model.addAttribute("formateur", new Formateur()); // Ajouter un objet vide pour le formulaire formateur
-        return "login"; // Retourne le nom du template login.html
+        if (!model.containsAttribute("etudiant")) {
+            model.addAttribute("etudiant", new Etudiant()); // Ajoute un objet vide pour le formulaire étudiant
+        }
+        if (!model.containsAttribute("formateur")) {
+            model.addAttribute("formateur", new Formateur()); // Ajoute un objet vide pour le formulaire formateur
+        }
+        return "login"; // Nom de votre template
     }
 
+
     @PostMapping("/connexion")
-    public String login(@RequestParam("id") Long id, HttpSession session, Model model) {
-        // Vérifier si l'ID correspond à un étudiant
-        try {
-            Etudiant etudiant = etudiantClient.getEtudiantById(id);
-            if (etudiant != null) {
-                // Stocker l'ID utilisateur dans la session
-                session.setAttribute("userId", id);
-                session.setAttribute("userType", "etudiant");
-                model.addAttribute("etudiant", etudiant);
-                return "etudiants"; // Page des étudiants
-            }
-        } catch (Exception e) {
-            // Ignorer si l'ID n'est pas trouvé
+    public String login(@RequestParam("id") String id, HttpSession session, Model model) {
+        model.addAttribute("etudiant", new Etudiant());
+        model.addAttribute("formateur", new Formateur());
+        // Vérifier si l'ID respecte le format attendu
+        if (!id.matches("^[16]\\d{5,}$")) {
+            model.addAttribute("error", "L'ID doit commencer par 1 ou 6 et contenir au moins 6 chiffres.");
+            return "login"; // Retourne la page de connexion avec le message d'erreur
         }
 
-        // Vérifier si l'ID correspond à un formateur
         try {
-            Formateur formateur = formateurClient.getFormateurById(id);
+            // Vérifier si l'ID correspond à un formateur
+            Long idLong = Long.parseLong(id);
+            Formateur formateur = formateurClient.getFormateurById(idLong);
             if (formateur != null) {
-                // Stocker l'ID utilisateur dans la session
-                session.setAttribute("userId", id);
+                session.setAttribute("userId", idLong);
                 session.setAttribute("userType", "formateur");
                 model.addAttribute("formateur", formateur);
                 return "formateurs"; // Page des formateurs
             }
         } catch (Exception e) {
-            // Ignorer si l'ID n'est pas trouvé
+            // Ignorer l'exception si l'ID ne correspond pas à un formateur
+        }
+
+        try {
+            // Vérifier si l'ID correspond à un étudiant
+            Long idLong = Long.parseLong(id);
+            Etudiant etudiant = etudiantClient.getEtudiantById(idLong);
+            if (etudiant != null) {
+                session.setAttribute("userId", idLong);
+                session.setAttribute("userType", "etudiant");
+                model.addAttribute("etudiant", etudiant);
+                return "etudiants"; // Page des étudiants
+            }
+        } catch (Exception e) {
+            // Ignorer l'exception si l'ID ne correspond pas à un étudiant
         }
 
         // Si l'ID n'est pas reconnu, afficher un message d'erreur
-        model.addAttribute("error", "ID non reconnu");
-        return "login"; // Reste sur la page de connexion
+        model.addAttribute("error", "ID non reconnu ou inexistant.");
+        return "login"; // Retourne la page de connexion avec le message d'erreur
     }
+
+
+
+
 
 
     @GetMapping("/login")
@@ -138,10 +156,29 @@ public class EtudiantController {
     }
 
     @PostMapping("/login/etudiants")
-    public String addEtudiant(@ModelAttribute("etudiant") Etudiant etudiant) {
-        etudiantClient.addEtudiant(etudiant);  // Ajoute l'étudiant via l'API
-        return "redirect:/login";  // Redirige vers la liste pour afficher la mise à jour
+    public String addEtudiant(@ModelAttribute("etudiant") Etudiant etudiant, RedirectAttributes redirectAttributes) {
+        // Ajoute l'étudiant via l'API
+        etudiantClient.addEtudiant(etudiant);
+
+        // Récupère la liste de tous les étudiants
+        List<Etudiant> etudiants = etudiantClient.getAllEtudiants();
+
+        // Trouve l'étudiant avec l'ID le plus élevé
+        Etudiant newEtudiant = etudiants.stream()
+                .max((e1, e2) -> Long.compare(e1.getId(), e2.getId()))
+                .orElse(null);
+
+        if (newEtudiant != null) {
+            Long newEtudiantId = newEtudiant.getId();
+            redirectAttributes.addFlashAttribute("successMessage", "Inscription réussie ! Votre ID de connexion est : " + newEtudiantId);
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Inscription réussie, mais impossible de récupérer votre ID. Veuillez contacter l'administration.");
+        }
+
+        return "redirect:/connexion";  // Redirige vers la page de connexion
     }
+
+
 
     @PostMapping("/etudiants/update")
     public String updateEtudiant(
