@@ -1,5 +1,6 @@
 package com.example.mywebapp.client;
 
+import com.example.mywebapp.model.Cours;
 import com.example.mywebapp.model.Reservation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -29,4 +30,7 @@ public interface ReservationClient {
 
     @GetMapping("/api/reservations/cours/{id}")
     List<Reservation> getReservationByCoursId(@PathVariable("id") Long id);
+
+    @GetMapping("/api/reservations/eleve/{id}/cours")
+    List<Reservation> getCoursByEleveId(@PathVariable("id") Long id);
 }

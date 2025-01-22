@@ -126,7 +126,7 @@ public class CoursController {
         return "redirect:/formateurs";
     }
 
-    @GetMapping("/etudiant/cours")
+    @GetMapping("/etudiant2/cours")
     public String getCoursPourEtudiant(HttpSession session, Model model) {
         Long etudiantId = (Long) session.getAttribute("userId");
         String userType = (String) session.getAttribute("userType");
@@ -136,7 +136,7 @@ public class CoursController {
         }
 
         // Récupérer les réservations de l'étudiant
-        List<Reservation> reservations = reservationClient.getReservationByIdEleve(etudiantId);
+        List<Reservation> reservations = reservationClient.getCoursByEleveId(etudiantId);
 
         // Récupérer les cours associés
         List<Cours> coursInscrits = new ArrayList<>();
