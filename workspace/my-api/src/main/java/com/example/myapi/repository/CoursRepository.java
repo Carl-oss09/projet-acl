@@ -20,6 +20,10 @@ public interface CoursRepository extends JpaRepository<Cours, Long> {
      */
     List<Cours> findByDate(String date);
 
+    // Méthode pour récupérer plusieurs cours à partir d'une liste d'IDs
+    List<Cours> findAllById(Iterable<Long> ids);
+
+
     /**
      * Trouve les cours par matière.
      *

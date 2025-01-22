@@ -126,6 +126,31 @@ public class CoursController {
         return "redirect:/formateurs";
     }
 
+    @GetMapping("/etudiant/cours")
+    public String getCoursPourEtudiant(HttpSession session, Model model) {
+        Long etudiantId = (Long) session.getAttribute("userId");
+        String userType = (String) session.getAttribute("userType");
+
+        if (etudiantId == null || !"etudiant".equals(userType)) {
+            return "redirect:/connexion";
+        }
+
+        // Récupérer les réservations de l'étudiant
+        List<Reservation> reservations = reservationClient.getReservationByIdEleve(etudiantId);
+
+        // Récupérer les cours associés
+        List<Cours> coursInscrits = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            Cours cours = coursClient.getCoursById(reservation.getIdCours());
+            if (cours != null) {
+                coursInscrits.add(cours);
+            }
+        }
+
+        model.addAttribute("coursInscrits", coursInscrits);
+        return "etudiants"; // Nom du fichier HTML pour afficher les cours
+    }
+
     @PostMapping("/cours/update")
     public String updateCours(
             @RequestParam("id") Long id,

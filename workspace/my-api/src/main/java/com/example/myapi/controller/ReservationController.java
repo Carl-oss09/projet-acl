@@ -1,5 +1,6 @@
 package com.example.myapi.controller;
 
+import com.example.myapi.model.Cours;
 import com.example.myapi.model.Reservation;
 import com.example.myapi.service.ReservationService;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,19 @@ public class ReservationController {
     public ResponseEntity<List<Reservation>> getAllReservations() {
         return ResponseEntity.ok(reservationService.getAllReservations());
     }
+
+    @Operation(summary = "Get courses for a specific student", description = "Retrieve all courses an eleve is enrolled in")
+    @GetMapping("/eleve/{idEleve}/cours")
+    public ResponseEntity<List<Cours>> getCoursByEleveId(@PathVariable Long idEleve) {
+        List<Cours> coursList = reservationService.getCoursByEleveId(idEleve);
+
+        if (coursList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(coursList);
+    }
+
 
     @PostMapping
     public ResponseEntity<Reservation> addReservation(@RequestBody Reservation reservation) {

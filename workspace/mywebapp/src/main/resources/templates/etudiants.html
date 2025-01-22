@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accueil Étudiant</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-
-    <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.css" rel="stylesheet">
-
     <style>
         body {
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
         }
-
         .header {
             display: flex;
             justify-content: space-between;
@@ -27,7 +23,6 @@
             font-size: 1.5rem;
             height: 60px;
         }
-
         .profile-btn {
             font-size: 1rem;
             color: white;
@@ -36,27 +31,22 @@
             padding: 5px 15px;
             border-radius: 5px;
         }
-
         .profile-btn:hover {
             background-color: #004080;
         }
-
         .content {
             display: flex;
-            height: calc(100vh - 60px); /* Subtracting header height */
+            height: calc(100vh - 60px);
         }
-
         .left-section {
             width: 50%;
             padding: 20px;
             border-right: 2px solid #ddd;
         }
-
         .right-section {
             width: 50%;
             padding: 20px;
         }
-
         #calendar {
             max-width: 100%;
             margin: 0 auto;
@@ -92,11 +82,9 @@
 </a>
 
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-<!-- FullCalendar JS -->
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.js"></script>
 
@@ -109,49 +97,34 @@
                 center: 'title',
                 right: 'month,agendaWeek,agendaDay'
             },
-            views: {
-                agendaWeek: {
-                    type: 'agendaWeek',
-                    columnFormat: 'D MMM', // Affiche le jour et le mois (ex : 5 janv.)
-                    allDaySlot: true, // Garde la zone all-day
-                    slotDuration: '24:00:00', // Supprime les heures détaillées
-                    slotLabelFormat: '', // Enlève les labels d'heures
-                },
-                agendaDay: {
-                    type: 'agendaDay',
-                    columnFormat: 'D MMM',
-                    allDaySlot: true,
-                    slotDuration: '24:00:00',
-                    slotLabelFormat: '',
-                }
+            events: function(start, end, timezone, callback) {
+                $.ajax({
+                    url: '/etudiant/cours', // Endpoint pour récupérer les cours inscrits
+                    method: 'GET',
+                    success: function(coursInscrits) {
+                        console.log('Cours récupérés :', coursInscrits); // Ajout du log
+                        var events = coursInscrits.map(function(cours) {
+                            return {
+                                title: cours.titre,
+                                start: cours.date + 'T' + (cours.aprem_matin ? '13:00:00' : '09:00:00'),
+                                end: cours.date + 'T' + (cours.aprem_matin ? '17:00:00' : '12:00:00'),
+                                description: cours.description,
+                                backgroundColor: cours.aprem_matin ? '#28a745' : '#007bff',
+                                textColor: '#ffffff'
+                            };
+                        });
+                        callback(events);
+                    },
+                    error: function() {
+                        alert('Erreur lors du chargement des cours.');
+                    }
+                });
             },
-            events: [
-                {
-                    title: 'Mathématiques - L1',
-                    start: '2024-12-21T10:00:00',
-                    end: '2024-12-21T12:00:00',
-                    description: 'Cours de mathématiques pour les étudiants en L1.',
-                    backgroundColor: '#007bff',
-                    textColor: '#ffffff'
-                },
-                {
-                    title: 'Informatique - L2',
-                    start: '2024-12-22T14:00:00',
-                    end: '2024-12-22T16:00:00',
-                    description: 'Cours d\'informatique pour les étudiants en L2.',
-                    backgroundColor: '#28a745',
-                    textColor: '#ffffff'
-                },
-                {
-                    title: 'Physique - L3',
-                    start: '2024-12-23T09:00:00',
-                    end: '2024-12-23T11:00:00',
-                    description: 'Cours de physique pour les étudiants en L3.',
-                    backgroundColor: '#dc3545',
-                    textColor: '#ffffff'
+            eventRender: function(event, element) {
+                if (event.description) {
+                    element.attr('title', event.description);
                 }
-            ],
-            titleFormat: 'D MMMM' // Format du titre du calendrier
+            }
         });
     });
 </script>

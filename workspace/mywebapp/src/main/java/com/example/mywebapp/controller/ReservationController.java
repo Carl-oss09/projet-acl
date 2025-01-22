@@ -22,6 +22,8 @@ public class ReservationController {
     @Autowired
     private CoursClient coursClient;
 
+
+
     @GetMapping("/reservations")
     public String getReservations(Model model) {
         List<Reservation> reservationList = reservationClient.getAllReservations();
