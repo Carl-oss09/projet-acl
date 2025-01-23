@@ -10,9 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Controller
 public class CoursController {
@@ -228,5 +226,18 @@ public class CoursController {
         }
         return "redirect:/recherche";
     }
+
+    @GetMapping("/reservations/eleve/cours")
+    @ResponseBody
+    public Map<String, Object> getCoursByEleveId(HttpSession session) {
+        Long idEtudiant = (Long) session.getAttribute("userId");
+        List<Cours> coursList = coursClient.getCoursByEleveId(idEtudiant);
+
+        // Retournez une réponse structurée sous forme de JSON
+        Map<String, Object> response = new HashMap<>();
+        response.put("coursList", coursList); // Assurez-vous que la clé correspond
+        return response;
+    }
+
 
 }

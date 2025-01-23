@@ -99,21 +99,23 @@
             },
             events: function(start, end, timezone, callback) {
                 $.ajax({
-                    url: '/etudiant2/cours', // Endpoint pour récupérer les cours inscrits
+                    url: '/reservations/eleve/cours', // API pour récupérer les cours
                     method: 'GET',
-                    success: function(coursInscrits) {
-                        console.log('Cours récupérés :', coursInscrits); // Ajout du log
-                        var events = coursInscrits.map(function(cours) {
-                            return {
-                                title: cours.titre,
-                                start: cours.date + 'T' + (cours.aprem_matin ? '13:00:00' : '09:00:00'),
-                                end: cours.date + 'T' + (cours.aprem_matin ? '17:00:00' : '12:00:00'),
-                                description: cours.description,
-                                backgroundColor: cours.aprem_matin ? '#28a745' : '#007bff',
-                                textColor: '#ffffff'
-                            };
+                    success: function(response) {
+                        var coursList = response.coursList; // Les cours récupérés depuis l'API
+                        var events = []; // Tableau des événements pour FullCalendar
+
+                        // Transformation des cours en événements pour le calendrier
+                        coursList.forEach(function(cours) {
+                            events.push({
+                                id: cours.id, // ID du cours
+                                title: cours.titre, // Titre du cours
+                                start: cours.date, // Date du cours
+                                description: cours.description, // Description du cours
+                            });
                         });
-                        callback(events);
+
+                        callback(events); // Passer les événements au calendrier
                     },
                     error: function() {
                         alert('Erreur lors du chargement des cours.');
@@ -122,7 +124,7 @@
             },
             eventRender: function(event, element) {
                 if (event.description) {
-                    element.attr('title', event.description);
+                    element.attr('title', event.description); // Ajouter un tooltip avec la description
                 }
             }
         });
