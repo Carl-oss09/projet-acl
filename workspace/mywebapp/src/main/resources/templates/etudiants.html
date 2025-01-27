@@ -66,8 +66,10 @@
     <!-- Left Section -->
     <div class="left-section">
         <h3>Informations Générales</h3>
-        <p>Contenu supplémentaire pour l'étudiant, tel que des statistiques ou des actualités.</p>
+        <canvas id="coursParMatiereChart" width="400" height="200"></canvas>
+        <canvas id="inscriptionsParSemaineChart" width="400" height="200" style="margin-top: 20px;"></canvas>
     </div>
+
 
     <!-- Right Section -->
     <div class="right-section">
@@ -87,6 +89,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     $(document).ready(function() {
@@ -126,6 +129,86 @@
                 if (event.description) {
                     element.attr('title', event.description); // Ajouter un tooltip avec la description
                 }
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Récupération des données pour les graphiques
+        $.ajax({
+            url: '/reservations/eleve/cours', // API pour récupérer les données
+            method: 'GET',
+            success: function(response) {
+                const coursList = response.coursList;
+
+                // Préparer les données pour les graphiques
+                const matiereCounts = {}; // Compteur de cours par matière
+                const weekCounts = {}; // Compteur de cours par semaine
+
+                coursList.forEach(function(cours) {
+                    // Compter les cours par matière
+                    matiereCounts[cours.matiere] = (matiereCounts[cours.matiere] || 0) + 1;
+
+                    // Compter les cours par semaine
+                    const week = moment(cours.date).startOf('isoWeek').format('YYYY-WW');
+                    weekCounts[week] = (weekCounts[week] || 0) + 1;
+                });
+
+                // Générer le graphique des cours par matière
+                const matieres = Object.keys(matiereCounts);
+                const counts = Object.values(matiereCounts);
+                new Chart(document.getElementById('coursParMatiereChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: matieres,
+                        datasets: [{
+                            label: 'Cours par matière',
+                            data: counts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Générer le graphique des inscriptions par semaine
+                const weeks = Object.keys(weekCounts).map(week => `Semaine ${week.split('-')[1]}`);
+                const weekCountsData = Object.values(weekCounts);
+                new Chart(document.getElementById('inscriptionsParSemaineChart'), {
+                    type: 'line',
+                    data: {
+                        labels: weeks,
+                        datasets: [{
+                            label: 'Inscriptions par semaine',
+                            data: weekCountsData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            },
+            error: function() {
+                alert('Erreur lors du chargement des données pour les graphiques.');
             }
         });
     });

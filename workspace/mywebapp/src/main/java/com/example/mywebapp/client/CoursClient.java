@@ -13,7 +13,7 @@ public interface CoursClient {
     @GetMapping("/api/cours")
     List<Cours> getAllCours();
 
-    @GetMapping("/api/formateur/{id}")
+    @GetMapping("/api/cours/formateur/{id}")
     List<Cours> getCoursByFormateurId(@PathVariable("id") Long id);
 
     // Recherche de cours avec paramètres facultatifs

@@ -1,4 +1,7 @@
 package com.example.my_batch.repository;
 
-public class EtudiantRepository {
+import com.example.my_batch.model.Etudiant;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface EtudiantRepository extends JpaRepository<Etudiant, Long> {
 }

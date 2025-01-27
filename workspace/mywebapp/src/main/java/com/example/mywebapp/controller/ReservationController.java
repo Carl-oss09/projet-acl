@@ -32,39 +32,6 @@ public class ReservationController {
         return "reservations";  // Retourne le template reservations.html
     }
 
-    @GetMapping("/recherche2")
-    public String afficherCours(HttpSession session, Model model) {
-        Long userId = (Long) session.getAttribute("userId");
-        String userType = (String) session.getAttribute("userType");
-
-        if (userId == null || userType == null || !userType.equals("etudiant")) {
-            return "redirect:/connexion";
-        }
-
-        // Récupération des cours disponibles
-        List<Cours> coursList = coursClient.getAllCours();
-
-        // Récupération des réservations effectuées par l'étudiant
-        List<Reservation> Resa = reservationClient.getReservationByIdEleve(userId);
-
-        // Liste pour stocker les cours réservés par l'étudiant
-        List<Cours> coursReserves = new ArrayList<>();
-
-        // Récupérer les cours associés à chaque réservation
-        for (Reservation reservation : Resa) {
-            // Utiliser l'ID du cours dans la réservation pour récupérer le cours correspondant
-            Cours coursReserve = coursClient.getCoursById(reservation.getIdCours());
-            if (coursReserve != null) {
-                coursReserves.add(coursReserve);
-            }
-        }
-
-        model.addAttribute("coursList", coursList);
-        model.addAttribute("coursReserves", coursReserves);
-        return "recherche";
-    }
-
-
     @GetMapping("/cours/inscrire")
     public String inscrireCours(@RequestParam("idCours") Long idCours, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");

@@ -89,26 +89,6 @@ public class CoursController {
         return "formateurs";
     }
 
-    @GetMapping("/formateur/cours")
-    public String getCoursByFormateur(HttpSession session, Model model) {
-        Long formateurId = (Long) session.getAttribute("userId");
-        String userType = (String) session.getAttribute("userType");
-
-        if (formateurId == null || userType == null || !userType.equals("formateur")) {
-            return "redirect:/connexion";
-        }
-
-        try {
-            List<Cours> coursList = coursClient.getCoursByFormateurId(formateurId);
-            model.addAttribute("coursList", coursList);
-            return "formateur-cours";
-        } catch (Exception e) {
-            model.addAttribute("error", "Une erreur s'est produite lors de la récupération des cours.");
-            e.printStackTrace();
-            return "formateur-cours";
-        }
-    }
-
     @PostMapping("/formateurs/cours")
     public String addCours(@ModelAttribute("cours") Cours cours, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
@@ -224,7 +204,7 @@ public class CoursController {
             e.printStackTrace();
             System.out.println("Erreur lors de l'inscription. Veuillez réessayer PTNNNNN.");
         }
-        return "redirect:/recherche";
+        return "etudiants";
     }
 
     @GetMapping("/reservations/eleve/cours")
@@ -232,6 +212,18 @@ public class CoursController {
     public Map<String, Object> getCoursByEleveId(HttpSession session) {
         Long idEtudiant = (Long) session.getAttribute("userId");
         List<Cours> coursList = coursClient.getCoursByEleveId(idEtudiant);
+
+        // Retournez une réponse structurée sous forme de JSON
+        Map<String, Object> response = new HashMap<>();
+        response.put("coursList", coursList); // Assurez-vous que la clé correspond
+        return response;
+    }
+
+    @GetMapping("/cours/formateur")
+    @ResponseBody
+    public Map<String, Object> getCoursByFormateurId(HttpSession session) {
+        Long idFormateur = (Long) session.getAttribute("userId");
+        List<Cours> coursList = coursClient.getCoursByFormateurId(idFormateur);
 
         // Retournez une réponse structurée sous forme de JSON
         Map<String, Object> response = new HashMap<>();

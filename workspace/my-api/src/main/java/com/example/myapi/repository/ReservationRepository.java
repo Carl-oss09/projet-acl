@@ -8,5 +8,5 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     List<Reservation> findByIdEleve(Long idEleve); // Utilisez le nom du champ dans l'entité
 
-    List<Reservation> findByIdCours(Long idCours); // Utilisez le nom du champ dans l'entité
+    List<Reservation> findByIdCours(Long idCours);// Utilisez le nom du champ dans l'entité
 }
