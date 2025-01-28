@@ -161,7 +161,6 @@ public class CoursController {
     }
 
     @PostMapping("/inscription/cours")
-    @ResponseBody
     public String inscrireEtudiant(@RequestParam Long idCours, HttpSession session) {
         System.out.println(idCours);
         try {
@@ -204,7 +203,7 @@ public class CoursController {
             e.printStackTrace();
             System.out.println("Erreur lors de l'inscription. Veuillez réessayer PTNNNNN.");
         }
-        return "etudiants";
+        return "recherche";
     }
 
     @GetMapping("/reservations/eleve/cours")

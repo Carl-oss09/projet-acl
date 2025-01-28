@@ -109,6 +109,7 @@
                 start: '08:00', // Heure de début
                 end: '17:00' // Heure de fin
             },
+            timeFormat: 'HH:mm',
             events: function(start, end, timezone, callback) {
                 $.ajax({
                     url: '/reservations/eleve/cours', // API pour récupérer les cours

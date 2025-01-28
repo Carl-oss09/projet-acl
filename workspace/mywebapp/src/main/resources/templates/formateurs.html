@@ -189,35 +189,35 @@
 <script>
     $(document).ready(function () {
         $('#calendar').fullCalendar({
-            locale: 'fr',
+            locale: 'fr', // Langue française
             header: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'month,agendaWeek,agendaDay',
             },
-            minTime: '08:00:00', // Début de la plage horaire affichée
-            maxTime: '17:00:00', // Fin de la plage horaire affichée
-            slotDuration: '00:30:00', // Durée des créneaux (30 minutes)
+            minTime: '08:00:00',
+            maxTime: '17:00:00',
+            slotDuration: '00:30:00',
             businessHours: {
-                dow: [1, 2, 3, 4, 5], // Jours actifs : Lundi à Vendredi
+                dow: [1, 2, 3, 4, 5], // Jours actifs
                 start: '08:00',
                 end: '17:00',
             },
+            timeFormat: 'HH:mm',
             events: function (start, end, timezone, callback) {
                 $.ajax({
-                    url: '/cours/formateur', // Endpoint pour récupérer les cours du formateur
+                    url: '/cours/formateur', // Endpoint pour récupérer les cours
                     method: 'GET',
                     success: function (response) {
-                        const coursList = response.coursList; // Les cours récupérés via l'API
+                        const coursList = response.coursList;
                         const events = coursList.map((cours) => ({
                             id: cours.id, // ID du cours
                             title: cours.titre, // Titre
-                            start: cours.date + 'T' + (cours.aprem_matin ? '14:00:00' : '09:00:00'), // Matin ou Après-midi
-                            end: cours.date + 'T' + (cours.aprem_matin ? '17:00:00' : '12:00:00'), // Fin du créneau
-                            description: cours.description || '', // Description
+                            start: cours.date + 'T' + (cours.aprem_matin ? '14:00:00' : '09:00:00'), // Début
+                            end: cours.date + 'T' + (cours.aprem_matin ? '17:00:00' : '12:00:00'), // Fin
+                            description: cours.description || '', // Description du cours
                         }));
-
-                        callback(events); // Passer les cours au calendrier
+                        callback(events); // Charger les cours dans le calendrier
                     },
                     error: function () {
                         alert('Erreur lors du chargement des cours.');
@@ -226,7 +226,9 @@
             },
             eventRender: function (event, element) {
                 if (event.description) {
-                    element.attr('title', event.description); // Ajouter un tooltip
+                    // Ajouter un attribut 'data-toggle' pour activer Bootstrap Tooltip
+                    element.attr('data-toggle', 'tooltip');
+                    element.attr('title', event.description); // Définir le texte du tooltip
                 }
             },
         });
