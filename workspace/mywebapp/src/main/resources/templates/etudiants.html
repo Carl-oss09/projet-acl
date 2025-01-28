@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -213,6 +213,61 @@
         });
     });
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        checkAndShowPopup();
+    });
+
+    function checkAndShowPopup() {
+        let today = new Date();
+        let dayOfWeek = today.getDay(); // 5 = Vendredi
+
+        if (dayOfWeek === 2) { // Vérifie si on est vendredi
+            fetch("/api/cours-semaine-prochaine?eleveId=6000000")
+                .then(response => response.json())
+                .then(cours => {
+                    if (cours.length > 0) {
+                        showPopup(cours);
+                    } else {
+                        console.log("Aucun cours à afficher.");
+                    }
+                })
+                .catch(error => console.error("Erreur lors de la récupération des cours :", error));
+        }
+    }
+
+    function showPopup(cours) {
+        let popupContent = "<h2>📅 Cours de la semaine prochaine</h2><ul>";
+
+        cours.forEach(c => {
+            popupContent += `<li><strong>${c.titre}</strong> - ${c.date}</li>`;
+        });
+
+        popupContent += "</ul>";
+
+        let popup = document.createElement("div");
+        popup.innerHTML = popupContent;
+        popup.style.position = "fixed";
+        popup.style.top = "20px";
+        popup.style.right = "20px";
+        popup.style.background = "white";
+        popup.style.padding = "15px";
+        popup.style.border = "1px solid black";
+        popup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.1)";
+        popup.style.zIndex = "1000";
+
+        let closeButton = document.createElement("button");
+        closeButton.innerText = "Fermer";
+        closeButton.style.marginTop = "10px";
+        closeButton.onclick = () => document.body.removeChild(popup);
+
+        popup.appendChild(closeButton);
+        document.body.appendChild(popup);
+    }
+
+</script>
+
 
 </body>
 </html>

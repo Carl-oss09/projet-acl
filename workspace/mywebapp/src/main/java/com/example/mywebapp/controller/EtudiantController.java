@@ -1,5 +1,6 @@
 package com.example.mywebapp.controller;
 
+
 import com.example.mywebapp.client.EtudiantClient;
 import com.example.mywebapp.client.FormateurClient;
 import com.example.mywebapp.model.Cours;
@@ -77,6 +78,9 @@ public class EtudiantController {
                 session.setAttribute("userId", idLong);
                 session.setAttribute("userType", "etudiant");
                 model.addAttribute("etudiant", etudiant);
+
+
+
                 return "etudiants"; // Page des étudiants
             }
         } catch (Exception e) {

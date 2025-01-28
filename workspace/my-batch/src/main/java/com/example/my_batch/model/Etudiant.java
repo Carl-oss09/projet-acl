@@ -1,14 +1,28 @@
 package com.example.my_batch.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+
+@Entity
 public class Etudiant {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "etudiant_seq")
+    @SequenceGenerator(name = "etudiant_seq", sequenceName = "etudiant_sequence", allocationSize = 1, initialValue = 6000000)
     private Long id;
 
+    @JsonProperty("nom")
     private String nom;
+
+    @JsonProperty("prenom")
     private String prenom;
 
+    @JsonProperty("l1")
     private boolean L1;
+    @JsonProperty("l2")
     private boolean L2;
+
+    @JsonProperty("l3")
     private boolean L3;
 
     // Constructeurs
@@ -70,5 +84,4 @@ public class Etudiant {
     public void setL3(boolean L3) {
         this.L3 = L3;
     }
-
 }

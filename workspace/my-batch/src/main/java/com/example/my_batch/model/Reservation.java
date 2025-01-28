@@ -1,7 +1,12 @@
 package com.example.my_batch.model;
 
+import jakarta.persistence.*;
+
+@Entity
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long idCours;
@@ -28,8 +33,8 @@ public class Reservation {
         return idCours;
     }
 
-    public void setIdCours(Long idCours) {
-        this.idCours = idCours;
+    public void setIdCours(Long id_cours) {
+        this.idCours = id_cours;
     }
 
     public Long getIdEleve() {

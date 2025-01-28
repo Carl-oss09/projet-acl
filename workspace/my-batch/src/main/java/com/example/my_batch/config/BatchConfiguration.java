@@ -1,9 +1,6 @@
 package com.example.my_batch.config;
 
 import com.example.my_batch.model.Cours;
-import com.example.my_batch.repository.CoursRepository;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.SimpleJob;
@@ -13,136 +10,135 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.ListItemReader;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpSession;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Configuration
+@Component  // ✅ Rend la classe détectable par Spring
 @EnableBatchProcessing
 public class BatchConfiguration {
 
-    private final CoursRepository coursRepository;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final JobLauncher jobLauncher;
 
-    public BatchConfiguration(CoursRepository coursRepository, JobRepository jobRepository,
-                              PlatformTransactionManager transactionManager, JobLauncher jobLauncher) {
-        this.coursRepository = coursRepository;
+    public BatchConfiguration(JobRepository jobRepository,
+                              PlatformTransactionManager transactionManager,
+                              JobLauncher jobLauncher) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.jobLauncher = jobLauncher;
     }
 
-    // 1. Reader - Fetch data dynamically from API
     @Bean
-    public ListItemReader<Cours> reader() {
-        List<Cours> coursList = fetchCoursForNextWeekFromAPI();
+    public ItemProcessor<Cours, Cours> processor() {
+        return cours -> cours; // ✅ Ajoutez ici une logique de transformation si nécessaire
+    }
+
+    public ListItemReader<Cours> reader(Long eleveId) {
+        List<Cours> coursList = fetchCoursForNextWeekFromAPI(eleveId);
+
+        // ✅ Affichage des cours récupérés
+        System.out.println("\n📚 [Reader] Cours récupérés pour l'étudiant ID " + eleveId + " :");
+        if (coursList.isEmpty()) {
+            System.out.println("⚠ Aucun cours trouvé.");
+        } else {
+            coursList.forEach(cours ->
+                    System.out.println("🔹 Cours : " + cours.getTitre() + " | Date : " + cours.getDate()));
+        }
+
         return new ListItemReader<>(coursList);
     }
 
-    private List<Cours> fetchCoursForNextWeekFromAPI() {
-        Long eleveId = getConnectedStudentId();
-        if (eleveId == null) {
-            throw new IllegalStateException("Élève non connecté");
-        }
-
-        String apiUrl = "http://localhost:8080/api/reservation/eleve/" + eleveId + "/cours";
+    public List<Cours> fetchCoursForNextWeekFromAPI(Long eleveId) {
+        String apiUrl = "http://localhost:8080/api/reservations/eleve/" + eleveId + "/cours";
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<Cours[]> response = restTemplate.getForEntity(apiUrl, Cours[].class);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return Arrays.stream(response.getBody())
-                    .filter(cours -> isNextWeek(cours.getDate())) // Filtrer les cours de la semaine prochaine
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            List<Cours> coursList = Arrays.stream(response.getBody())
+                    .filter(cours -> isNextWeek(cours.getDate())) // ✅ Filtrage des cours de la semaine prochaine
                     .collect(Collectors.toList());
+            return coursList;
         } else {
-            throw new RuntimeException("Erreur lors de l'appel à l'API");
+            throw new RuntimeException("❌ Erreur lors de l'appel à l'API.");
         }
     }
 
-    private boolean isNextWeek(LocalDate date) {
-        LocalDate today = LocalDate.now();
-        LocalDate nextWeekStart = today.plusDays(1).with(DayOfWeek.MONDAY);
-        LocalDate nextWeekEnd = nextWeekStart.plusDays(6);
-        return (date.isAfter(nextWeekStart) || date.isEqual(nextWeekStart)) &&
-                (date.isBefore(nextWeekEnd) || date.isEqual(nextWeekEnd));
-    }
 
-    private Long getConnectedStudentId() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attributes != null) {
-            HttpSession session = attributes.getRequest().getSession(false);
-            if (session != null) {
-                return (Long) session.getAttribute("studentId");
-            }
-        }
-        return null;
-    }
-
-    // 2. Processor - Optional processing logic
-    @Bean
-    public ItemProcessor<Cours, Cours> processor() {
-        return cours -> {
-            // Add any additional processing logic here if needed
-            System.out.println("Processing course: " + cours.getTitre());
-            return cours;
-        };
-    }
-
-    // 3. Writer - Save to the database or log the result
-    @Bean
     public ItemWriter<Cours> writer() {
         return items -> {
-            for (Cours cours : items) {
-                System.out.println("Saving course: " + cours);
-                coursRepository.save(cours);
+            System.out.println("\n📌 [Writer] Écriture des cours :");
+            if (items.isEmpty()) {
+                System.out.println("⚠ Aucun cours à écrire.");
+            } else {
+                items.forEach(cours ->
+                        System.out.println("✏ Cours : " + cours.getTitre() + " | Date : " + cours.getDate()));
             }
         };
     }
 
-    // 4. Step - Combine Reader, Processor, and Writer
-    @Bean
-    public Step coursStep() {
+    public Step coursStep(Long eleveId) {
         return new StepBuilder("coursStep", jobRepository)
                 .<Cours, Cours>chunk(10, transactionManager)
-                .reader(reader())
-                .processor(processor())
+                .reader(reader(eleveId))
+                .processor(processor())  // ✅ Appel direct sans injection
                 .writer(writer())
                 .transactionManager(transactionManager)
                 .build();
     }
 
-    // 5. Job - Define the batch job
-    @Bean
-    public Job importCoursJob() {
+    private boolean isNextWeek(String dateString) {
+        try {
+            LocalDate date = LocalDate.parse(dateString);  // ✅ Conversion de la date
+
+            // ✅ Définition des limites de la semaine prochaine (lundi - vendredi)
+            LocalDate nextWeekStart = LocalDate.of(2025, 2, 3); // 3 février 2025 (lundi)
+            LocalDate nextWeekEnd = LocalDate.of(2025, 2, 7);   // 7 février 2025 (vendredi)
+
+            // ✅ Vérification si la date est dans la semaine prochaine
+            boolean isValid = !date.isBefore(nextWeekStart) && !date.isAfter(nextWeekEnd);
+
+            return isValid;
+        } catch (Exception e) {
+            System.err.println("⚠ Erreur : Format de date invalide - " + dateString);
+            return false;
+        }
+    }
+
+
+    public SimpleJob importCoursJob(Long eleveId) {
         SimpleJob job = new SimpleJob();
         job.setJobRepository(jobRepository);
-        job.addStep(coursStep());
+        job.addStep(coursStep(eleveId));
         return job;
     }
 
-    // 6. CommandLineRunner - Trigger the batch job on application startup
-    @Bean
-    public CommandLineRunner runBatchJob() {
-        return args -> {
-            try {
-                System.out.println("Starting the batch job...");
-                jobLauncher.run(importCoursJob(), new JobParameters());
-            } catch (Exception e) {
-                System.err.println("Job failed: " + e.getMessage());
-            }
-        };
+    public void triggerBatchJob(Long eleveId) {
+        try {
+            System.out.println("\n🚀 Déclenchement du batch pour l'étudiant ID " + eleveId);
+            jobLauncher.run(importCoursJob(eleveId), new org.springframework.batch.core.JobParameters());
+            System.out.println("✅ Batch exécuté à " + LocalDateTime.now());
+        } catch (Exception e) {
+            System.err.println("❌ Échec du batch : " + e.getMessage());
+        }
+    }
+
+    // ✅ Test : Exécution toutes les 20 secondes
+    @Scheduled(cron = "0 */1 8-23 ? * TUE")
+    public void testScheduledExecution() {
+        Long testStudentId = 6000000L;
+        System.out.println("\n⏰ [Planificateur] Lancement du batch toutes les 20s... Heure actuelle : " + LocalDateTime.now());
+        triggerBatchJob(testStudentId);
     }
 }
