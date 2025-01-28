@@ -187,47 +187,52 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.js"></script>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('#calendar').fullCalendar({
             locale: 'fr',
             header: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'month,agendaWeek,agendaDay'
+                right: 'month,agendaWeek,agendaDay',
             },
-            events: function(start, end, timezone, callback) {
+            minTime: '08:00:00', // Début de la plage horaire affichée
+            maxTime: '17:00:00', // Fin de la plage horaire affichée
+            slotDuration: '00:30:00', // Durée des créneaux (30 minutes)
+            businessHours: {
+                dow: [1, 2, 3, 4, 5], // Jours actifs : Lundi à Vendredi
+                start: '08:00',
+                end: '17:00',
+            },
+            events: function (start, end, timezone, callback) {
                 $.ajax({
-                    url: '/cours/formateur', // API pour récupérer les cours
+                    url: '/cours/formateur', // Endpoint pour récupérer les cours du formateur
                     method: 'GET',
-                    success: function(response) {
-                        var coursList = response.coursList; // Les cours récupérés depuis l'API
-                        var events = []; // Tableau des événements pour FullCalendar
+                    success: function (response) {
+                        const coursList = response.coursList; // Les cours récupérés via l'API
+                        const events = coursList.map((cours) => ({
+                            id: cours.id, // ID du cours
+                            title: cours.titre, // Titre
+                            start: cours.date + 'T' + (cours.aprem_matin ? '14:00:00' : '09:00:00'), // Matin ou Après-midi
+                            end: cours.date + 'T' + (cours.aprem_matin ? '17:00:00' : '12:00:00'), // Fin du créneau
+                            description: cours.description || '', // Description
+                        }));
 
-                        // Transformation des cours en événements pour le calendrier
-                        coursList.forEach(function(cours) {
-                            events.push({
-                                id: cours.id, // ID du cours
-                                title: cours.titre, // Titre du cours
-                                start: cours.date, // Date du cours
-                                description: cours.description, // Description du cours
-                            });
-                        });
-
-                        callback(events); // Passer les événements au calendrier
+                        callback(events); // Passer les cours au calendrier
                     },
-                    error: function() {
+                    error: function () {
                         alert('Erreur lors du chargement des cours.');
-                    }
+                    },
                 });
             },
-            eventRender: function(event, element) {
+            eventRender: function (event, element) {
                 if (event.description) {
-                    element.attr('title', event.description); // Ajouter un tooltip avec la description
+                    element.attr('title', event.description); // Ajouter un tooltip
                 }
-            }
+            },
         });
     });
 </script>
+
 
 <script>
     $(document).ready(function() {

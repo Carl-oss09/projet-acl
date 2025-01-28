@@ -100,25 +100,44 @@
                 center: 'title',
                 right: 'month,agendaWeek,agendaDay'
             },
+            minTime: '08:00:00', // Début de la journée affichée
+            maxTime: '17:00:00', // Fin de la journée affichée
+            slotDuration: '00:30:00', // Durée des créneaux (30 minutes)
+            businessHours: {
+                // Jours et heures actifs
+                dow: [1, 2, 3, 4, 5], // Lundi à Vendredi (0 = Dimanche)
+                start: '08:00', // Heure de début
+                end: '17:00' // Heure de fin
+            },
             events: function(start, end, timezone, callback) {
                 $.ajax({
                     url: '/reservations/eleve/cours', // API pour récupérer les cours
                     method: 'GET',
                     success: function(response) {
-                        var coursList = response.coursList; // Les cours récupérés depuis l'API
+                        var coursList = response.coursList; // Liste des cours récupérés depuis l'API
                         var events = []; // Tableau des événements pour FullCalendar
 
                         // Transformation des cours en événements pour le calendrier
                         coursList.forEach(function(cours) {
+                            let eventStart, eventEnd;
+                            if (cours.aprem_matin) {
+                                eventStart = cours.date + 'T14:00:00'; // Après-midi
+                                eventEnd = cours.date + 'T17:00:00';
+                            } else {
+                                eventStart = cours.date + 'T09:00:00'; // Matin
+                                eventEnd = cours.date + 'T12:00:00';
+                            }
+
                             events.push({
-                                id: cours.id, // ID du cours
-                                title: cours.titre, // Titre du cours
-                                start: cours.date, // Date du cours
-                                description: cours.description, // Description du cours
+                                id: cours.id,
+                                title: cours.titre,
+                                start: eventStart,
+                                end: eventEnd,
+                                description: cours.description || ''
                             });
                         });
 
-                        callback(events); // Passer les événements au calendrier
+                        callback(events);
                     },
                     error: function() {
                         alert('Erreur lors du chargement des cours.');
@@ -133,6 +152,8 @@
         });
     });
 </script>
+
+
 
 <script>
     $(document).ready(function() {
