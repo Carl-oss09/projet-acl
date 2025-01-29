@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "formateurClient", url = "http://localhost:8080")
+@FeignClient(name = "formateurClient", url = "http://my-api:8080")
 public interface FormateurClient {
 
     @GetMapping("/api/formateurs")
