@@ -90,6 +90,7 @@
             <p th:text="'Description : ' + ${cours.description}">Description</p>
             <p th:text="'Matière : ' + ${cours.matiere}">Matière</p>
             <p th:text="'Date : ' + ${cours.date}">Date</p>
+            <p th:text="'Horaire : ' + (${cours.aprem_matin} ? 'Après-midi' : 'Matinée')">Horaire</p>
         </div>
         <div>
             <!-- Bouton S'inscrire -->
@@ -101,6 +102,9 @@
                     <span th:text="${cours.nb_eleves_max <= cours.nbInscriptions ? 'Complet' : 'S''inscrire'}"></span>
                 </button>
             </form>
+            <br><br><br><br>
+            <!-- Affichage des places prises sur places totales -->
+            <p th:text="'Places prises : ' + ${cours.nbInscriptions} + ' / ' + ${cours.nb_eleves_max}">Places prises</p>
         </div>
     </div>
 </div>
