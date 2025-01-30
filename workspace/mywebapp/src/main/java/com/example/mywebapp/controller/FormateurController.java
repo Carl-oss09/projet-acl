@@ -3,6 +3,7 @@ package com.example.mywebapp.controller;
 import com.example.mywebapp.client.FormateurClient;
 import com.example.mywebapp.client.CoursClient;
 import com.example.mywebapp.model.Cours;
+import com.example.mywebapp.model.Etudiant;
 import com.example.mywebapp.model.Formateur;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,28 +74,37 @@ public class FormateurController {
 
     @PostMapping("/formateurs/update")
     public String updateFormateur(
-            @RequestParam("id") Long id,
+            HttpSession session,
+            Model model,  // Ajout du Model
             @RequestParam("nom") String nom,
             @RequestParam("prenom") String prenom,
-            @RequestParam("L1") boolean L1,
-            @RequestParam("L2") boolean L2,
-            @RequestParam("L3") boolean L3) {
+            @RequestParam(value = "L1", defaultValue = "false") boolean L1,
+            @RequestParam(value = "L2", defaultValue = "false") boolean L2,
+            @RequestParam(value = "L3", defaultValue = "false") boolean L3) {
+
+        Long userId = (Long) session.getAttribute("userId");
+
         Formateur formateur = new Formateur();
-        formateur.setId(id);
         formateur.setNom(nom);
         formateur.setPrenom(prenom);
         formateur.setL1(L1);
         formateur.setL2(L2);
         formateur.setL3(L3);
 
-        formateurClient.updateFormateur(id, formateur);
+        formateurClient.updateFormateur(userId, formateur);
 
-        return "redirect:/formateurs";
+        // Récupérer l'étudiant mis à jour depuis la base
+        Formateur updatedFormateur = formateurClient.getFormateurById(userId);
+
+        // Ajouter l'étudiant au modèle pour Thymeleaf
+        model.addAttribute("formateur", updatedFormateur);
+
+        return "profil-formateur";
     }
 
     @PostMapping("/formateurs/delete")
     public String deleteFormateur(@RequestParam("id") Long id) {
         formateurClient.deleteFormateur(id);
-        return "redirect:/formateurs";
+        return "redirect:/login";
     }
 }

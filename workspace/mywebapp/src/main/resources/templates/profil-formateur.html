@@ -58,10 +58,28 @@
             font-size: 1.2rem;
         }
 
-        .logout {
-            display: block;
+        .buttons {
             margin-top: 20px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Style pour le formulaire caché */
+        #editForm {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -88,8 +106,54 @@
             </ul>
         </li>
     </ul>
+
+    <!-- Bouton Modifier -->
+    <button class="btn btn-warning btn-block" onclick="toggleForm()">Modifier</button>
+
+    <!-- Formulaire de modification (caché par défaut) -->
+    <form id="editForm" class="edit-form" th:action="@{/formateurs/update}" method="post">
+        <input type="hidden" name="id" th:value="${formateur.id}">
+
+        <div class="form-group">
+            <label for="prenom">Prénom :</label>
+            <input type="text" class="form-control" name="prenom" id="prenom" th:value="${formateur.prenom}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="nom">Nom :</label>
+            <input type="text" class="form-control" name="nom" id="nom" th:value="${formateur.nom}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Niveaux enseignés:</label><br>
+            <input type="checkbox" name="L1" th:checked="${formateur.L1}"> L1
+            <input type="checkbox" name="L2" th:checked="${formateur.L2}"> L2
+            <input type="checkbox" name="L3" th:checked="${formateur.L3}"> L3
+        </div>
+
+        <button type="submit" class="btn btn-success btn-block">Enregistrer</button>
+    </form>
+
+    <!-- Bouton Supprimer -->
+    <form th:action="@{/formateurs/delete}" method="post" style="margin-top: 10px;">
+        <input type="hidden" name="id" th:value="${formateur.id}">
+        <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?');">Supprimer</button>
+    </form>
+
+    <!-- Bouton Retour -->
     <a href="/formateurs" class="btn btn-primary btn-block logout">Retour à l'accueil</a>
 </div>
+
+<script>
+    function toggleForm() {
+        let form = document.getElementById("editForm");
+        if (form.style.display === "none" || form.style.display === "") {
+            form.style.display = "block";
+        } else {
+            form.style.display = "none";
+        }
+    }
+</script>
 
 </body>
 </html>

@@ -63,7 +63,19 @@
             margin-top: 20px;
             text-align: center;
         }
+
+        .edit-form {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
+
+    <script>
+        function toggleEditForm() {
+            let form = document.getElementById("editForm");
+            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+        }
+    </script>
 </head>
 <body>
 
@@ -88,6 +100,41 @@
             </ul>
         </li>
     </ul>
+
+    <!-- Bouton Modifier -->
+    <button class="btn btn-warning btn-block" onclick="toggleEditForm()">Modifier</button>
+
+    <!-- Formulaire de modification (caché par défaut) -->
+    <form id="editForm" class="edit-form" th:action="@{/etudiants/update}" method="post">
+        <input type="hidden" name="id" th:value="${etudiant.id}">
+
+        <div class="form-group">
+            <label for="prenom">Prénom :</label>
+            <input type="text" class="form-control" name="prenom" id="prenom" th:value="${etudiant.prenom}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="nom">Nom :</label>
+            <input type="text" class="form-control" name="nom" id="nom" th:value="${etudiant.nom}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Niveau :</label><br>
+            <input type="checkbox" name="L1" th:checked="${etudiant.L1}"> L1
+            <input type="checkbox" name="L2" th:checked="${etudiant.L2}"> L2
+            <input type="checkbox" name="L3" th:checked="${etudiant.L3}"> L3
+        </div>
+
+        <button type="submit" class="btn btn-success btn-block">Enregistrer</button>
+    </form>
+
+    <!-- Bouton Supprimer -->
+    <form th:action="@{/etudiants/delete}" method="post" style="margin-top: 10px;">
+        <input type="hidden" name="id" th:value="${etudiant.id}">
+        <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?');">Supprimer</button>
+    </form>
+
+    <!-- Bouton Retour -->
     <a href="/etudiants" class="btn btn-primary btn-block logout">Retour à l'accueil</a>
 </div>
 

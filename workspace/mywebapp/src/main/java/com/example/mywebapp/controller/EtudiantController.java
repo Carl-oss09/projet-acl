@@ -186,28 +186,37 @@ public class EtudiantController {
 
     @PostMapping("/etudiants/update")
     public String updateEtudiant(
-            @RequestParam("id") Long id,
+            HttpSession session,
+            Model model,  // Ajout du Model
             @RequestParam("nom") String nom,
             @RequestParam("prenom") String prenom,
-            @RequestParam("L1") boolean L1,
-            @RequestParam("L2") boolean L2,
-            @RequestParam("L3") boolean L3) {
+            @RequestParam(value = "L1", defaultValue = "false") boolean L1,
+            @RequestParam(value = "L2", defaultValue = "false") boolean L2,
+            @RequestParam(value = "L3", defaultValue = "false") boolean L3) {
+
+        Long userId = (Long) session.getAttribute("userId");
+
         Etudiant etudiant = new Etudiant();
-        etudiant.setId(id);
         etudiant.setNom(nom);
         etudiant.setPrenom(prenom);
         etudiant.setL1(L1);
         etudiant.setL2(L2);
         etudiant.setL3(L3);
 
-        etudiantClient.updateEtudiant(id, etudiant);
+        etudiantClient.updateEtudiant(userId, etudiant);
 
-        return "redirect:/etudiants";
+        // Récupérer l'étudiant mis à jour depuis la base
+        Etudiant updatedEtudiant = etudiantClient.getEtudiantById(userId);
+
+        // Ajouter l'étudiant au modèle pour Thymeleaf
+        model.addAttribute("etudiant", updatedEtudiant);
+
+        return "profil-etudiant";
     }
 
     @PostMapping("/etudiants/delete")
     public String deleteEtudiant(@RequestParam("id") Long id) {
         etudiantClient.deleteEtudiant(id);
-        return "redirect:/etudiants";
+        return "redirect:/login";
     }
 }
