@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   database:
     image: postgres:15
@@ -7,12 +8,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: postgres
+      TZ: Europe/Paris
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    restart: always
 
   api:
     build:
@@ -21,13 +24,15 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/postgres
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
+      TZ: Europe/Paris
     depends_on:
       - database
     networks:
       - app-network
+    restart: always
 
   webapp:
     build:
@@ -37,10 +42,32 @@ services:
       - "8082:8082"
     environment:
       API_URL: http://my-api:8080
+      TZ: Europe/Paris
     depends_on:
       - api
     networks:
       - app-network
+    restart: always
+
+  my-batch:
+    build:
+      context: ./my-batch
+    container_name: my-batch
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      WORKSPACE_PATH: /workspace
+      TZ: Europe/Paris
+    volumes:
+      - ../workspace:/workspace
+    depends_on:
+      - database
+      - api
+    networks:
+      - app-network
+    command: ["java", "-jar", "/app/my-batch.jar"]
+    restart: always
 
 volumes:
   postgres_data:
