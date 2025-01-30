@@ -64,11 +64,11 @@
 <!-- Filters -->
 <form th:action="@{/recherche}" method="get" class="filters-container" id="filter-form">
     <div class="filter-group">
-        <label for="date">Date :</label>
+        <label for="date">Date&nbsp;:</label>
         <input type="date" id="date" class="form-control" name="date" th:value="${date}">
     </div>
     <div class="filter-group">
-        <label for="matiere">Matière :</label>
+        <label for="matiere">Matière&nbsp;:</label>
         <select id="matiere" class="form-control" name="matiere">
             <option value="Toutes" th:selected="${matiere == null || matiere == 'Toutes'}">Toutes</option>
             <option value="Mathématiques" th:selected="${matiere == 'Mathématiques'}">Mathématiques</option>
@@ -94,7 +94,7 @@
         </div>
         <div>
             <!-- Bouton S'inscrire -->
-            <form th:action="@{/inscription/cours}" method="post">
+            <form th:action="@{/inscription/cours}" method="post" onsubmit="refreshAfterSubmit(event)">
                 <input type="hidden" name="idCours" th:value="${cours.id}" />
                 <button type="submit" class="btn btn-success"
                         th:disabled="${cours.nb_eleves_max <= cours.nbInscriptions || cours.estDejaInscrit ? 'disabled' : null}"
@@ -102,12 +102,35 @@
                     <span th:text="${cours.nb_eleves_max <= cours.nbInscriptions ? 'Complet' : 'S''inscrire'}"></span>
                 </button>
             </form>
+
             <br><br><br><br>
             <!-- Affichage des places prises sur places totales -->
             <p th:text="'Places prises : ' + ${cours.nbInscriptions} + ' / ' + ${cours.nb_eleves_max}">Places prises</p>
         </div>
     </div>
 </div>
+
+<script>
+    function refreshAfterSubmit(event) {
+        event.preventDefault(); // Empêche la soumission normale
+        let form = event.target; // Récupère le formulaire
+        let formData = new FormData(form); // Récupère les données du formulaire
+
+        fetch(form.action, {
+            method: form.method,
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload(); // Rafraîchit la page après l'inscription
+            } else {
+                alert("Erreur lors de l'inscription !");
+            }
+        }).catch(error => {
+            console.error("Erreur :", error);
+        });
+    }
+</script>
+
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
